@@ -2,6 +2,7 @@
   --brand: #3b4cca;
   --brand-dark: #2a3799;
   --bg: #f6f7fb;
+  --bs-body-font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
