@@ -8,7 +8,38 @@ const mine = document.getElementById('mine')
 const assigned = document.getElementById('assigned')
 const bookOptions = document.getElementById('book-options')
 
+const formTitle = document.getElementById('form-title')
+const cancelBtn = document.getElementById('cancel-btn')
+
 let session = null
+let editingId = null
+
+function enterEditMode(row) {
+  editingId = row.id
+  titleInput.value = row.book_title
+  summaryInput.value = row.summary
+  count.textContent = row.summary.length
+  formTitle.textContent = 'Edit your summary'
+  submitBtn.textContent = 'Save changes'
+  cancelBtn.classList.remove('d-none')
+  message.replaceChildren()
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  summaryInput.focus()
+}
+
+function leaveEditMode() {
+  editingId = null
+  form.reset()
+  count.textContent = '0'
+  formTitle.textContent = 'Submit a book summary'
+  submitBtn.textContent = 'Publish summary'
+  cancelBtn.classList.add('d-none')
+}
+
+cancelBtn.addEventListener('click', () => {
+  leaveEditMode()
+  message.replaceChildren()
+})
 
 async function loadAssigned() {
   const { data, error } = await db
@@ -74,7 +105,7 @@ summaryInput.addEventListener('input', () => {
 async function loadMine() {
   const { data, error } = await db
     .from('summaries')
-    .select('id, book_title, created_at')
+    .select('id, book_title, summary, created_at')
     .eq('user_id', session.user.id)
     .order('created_at', { ascending: false })
 
@@ -102,18 +133,35 @@ async function loadMine() {
             el('div', { class: 'text-muted small' }, formatDate(row.created_at))
           ),
           el(
-            'button',
-            {
-              class: 'btn btn-outline-danger btn-sm flex-shrink-0',
-              type: 'button',
-              onclick: async () => {
-                if (!confirm(`Delete your summary of “${row.book_title}”?`)) return
-                const { error: delError } = await db.from('summaries').delete().eq('id', row.id)
-                if (delError) showAlert(message, 'Could not delete that summary.')
-                else loadMine()
+            'div',
+            { class: 'd-flex gap-2 flex-shrink-0' },
+            el(
+              'button',
+              {
+                class: 'btn btn-outline-primary btn-sm',
+                type: 'button',
+                onclick: () => enterEditMode(row),
               },
-            },
-            'Delete'
+              'Edit'
+            ),
+            el(
+              'button',
+              {
+                class: 'btn btn-outline-danger btn-sm',
+                type: 'button',
+                onclick: async () => {
+                  if (!confirm(`Delete your summary of “${row.book_title}”?`)) return
+                  const { error: delError } = await db.from('summaries').delete().eq('id', row.id)
+                  if (delError) {
+                    showAlert(message, 'Could not delete that summary.')
+                    return
+                  }
+                  if (editingId === row.id) leaveEditMode()
+                  loadMine()
+                },
+              },
+              'Delete'
+            )
           )
         )
       )
@@ -131,24 +179,41 @@ form.addEventListener('submit', async (e) => {
     return
   }
 
+  const wasEditing = editingId !== null
   submitBtn.disabled = true
-  const { error } = await db
-    .from('summaries')
-    .insert({ user_id: session.user.id, book_title, summary })
+  let error
+  if (wasEditing) {
+    // Rely on row-level security for ownership; .select() lets us detect a no-op update.
+    const result = await db
+      .from('summaries')
+      .update({ book_title, summary })
+      .eq('id', editingId)
+      .select('id')
+    error = result.error || (result.data.length === 0 ? new Error('not updated') : null)
+  } else {
+    const result = await db
+      .from('summaries')
+      .insert({ user_id: session.user.id, book_title, summary })
+    error = result.error
+  }
   submitBtn.disabled = false
 
   if (error) {
-    showAlert(message, 'Could not publish your summary. Please try again.')
+    showAlert(
+      message,
+      wasEditing
+        ? 'Could not save your changes. Please try again.'
+        : 'Could not publish your summary. Please try again.'
+    )
     return
   }
 
-  form.reset()
-  count.textContent = '0'
+  leaveEditMode()
   message.replaceChildren(
     el(
       'div',
       { class: 'alert alert-success mb-0' },
-      'Published! ',
+      wasEditing ? 'Changes saved! ' : 'Published! ',
       el('a', { href: 'index.html', class: 'alert-link' }, 'See it on the home page')
     )
   )

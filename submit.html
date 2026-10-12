@@ -24,7 +24,7 @@
         <div class="col-12 col-lg-7">
           <div class="card shadow-sm">
             <div class="card-body p-4">
-              <h1 class="h4 mb-3">Submit a book summary</h1>
+              <h1 class="h4 mb-3" id="form-title">Submit a book summary</h1>
               <div id="message" class="mb-3"></div>
               <form id="summary-form" novalidate>
                 <div class="mb-3">
@@ -51,6 +51,9 @@
                   <div class="form-text text-end"><span id="count">0</span> / 10000</div>
                 </div>
                 <button id="submit-btn" class="btn btn-primary" type="submit">Publish summary</button>
+                <button id="cancel-btn" class="btn btn-outline-secondary d-none" type="button">
+                  Cancel
+                </button>
               </form>
             </div>
           </div>
