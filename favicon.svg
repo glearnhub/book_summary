@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#3b4cca"/>
+  <!-- open book -->
+  <path d="M32 21C26 16.5 17.5 16.5 10.5 19v26c7-2.500 15.500-2.500 21.500 2z" fill="#ffffff"/>
+  <path d="M32 21c6-4.500 14.500-4.500 21.500-2v26c-7-2.500-15.500-2.500-21.500 2z" fill="#e8ebff"/>
+  <!-- text lines on the pages -->
+  <path d="M16 27c4-1 8-1 11 .5M16 33c4-1 8-1 11 .5M37 27.500c3-1.500 7-1.500 11-.5M37 33.500c3-1.500 7-1.500 11-.5" stroke="#3b4cca" stroke-width="2.200" stroke-linecap="round" fill="none"/>
+  <!-- the "circle": a small ring of readers above the book -->
+  <circle cx="32" cy="10" r="4" fill="#ffc83d"/>
+</svg>
