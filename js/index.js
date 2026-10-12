@@ -9,6 +9,7 @@ const searchInput = document.getElementById('search')
 let query = ''
 let page = 0
 let requestId = 0
+let isAdmin = false
 
 function summaryCard(row) {
   const author = row.profiles?.display_name || 'Unknown member'
@@ -49,6 +50,30 @@ function summaryCard(row) {
       'Read more'
     )
     card.querySelector('.card-body').append(toggle)
+  }
+
+  if (isAdmin) {
+    const remove = el(
+      'button',
+      {
+        class: 'btn btn-outline-danger btn-sm',
+        type: 'button',
+        onclick: async () => {
+          if (!confirm(`Delete “${row.book_title}” by ${author}? This cannot be undone.`)) return
+          remove.disabled = true
+          const { error } = await db.from('summaries').delete().eq('id', row.id)
+          if (error) {
+            remove.disabled = false
+            showAlert(status, 'Could not delete that summary.')
+            return
+          }
+          card.remove()
+          if (feed.children.length === 0) load(true)
+        },
+      },
+      'Delete (admin)'
+    )
+    card.querySelector('.card-body').append(el('div', { class: 'mt-3' }, remove))
   }
 
   return card
@@ -123,5 +148,8 @@ loadMore.addEventListener('click', () => {
   load(false)
 })
 
-renderNav('home')
-load(true)
+;(async () => {
+  const session = await renderNav('home')
+  isAdmin = session?.role === 'superadmin'
+  load(true)
+})()
