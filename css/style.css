@@ -8,6 +8,19 @@
 body {
   background: var(--bg);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Keeps the footer at the bottom on short pages */
+main {
+  flex: 1 0 auto;
+}
+
+.site-footer {
+  color: #6c757d;
+  border-top: 1px solid #e3e5ec;
+  margin-top: 2rem;
 }
 
 .site-nav {

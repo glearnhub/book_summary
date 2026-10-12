@@ -142,6 +142,23 @@ async function renderNav(active) {
   return session
 }
 
+function renderFooter() {
+  const footer = el(
+    'footer',
+    { class: 'site-footer text-center small py-4' },
+    el(
+      'div',
+      { class: 'container' },
+      `© ${new Date().getFullYear()} Book Circle. All rights reserved.`,
+      el('br'),
+      'Design by Gideon Kiplangat'
+    )
+  )
+  document.body.append(footer)
+}
+
+renderFooter()
+
 function notConfiguredNotice() {
   return el(
     'div',
