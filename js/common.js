@@ -64,6 +64,7 @@ async function renderNav(active) {
   if (session) session.role = await fetchRole(session.user.id)
 
   const links = [{ href: 'index.html', label: 'Summaries', key: 'home' }]
+  if (session) links.push({ href: 'books.html', label: 'Books', key: 'books' })
   if (session) links.push({ href: 'submit.html', label: 'Submit a summary', key: 'submit' })
   if (session?.role === 'superadmin') links.push({ href: 'admin.html', label: 'Admin', key: 'admin' })
 

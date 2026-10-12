@@ -31,6 +31,11 @@ The superadmin sees an **Admin** link in the navigation, where they can add
 books and assign them to members. Members see their assigned books on the
 **Submit a summary** page. The role cannot be changed from the website.
 
+Run `supabase/005_members_see_assignments.sql` so signed-in members can open the
+**Books** page, which lists unassigned books and assigned books (with who has
+each). A book moves between the two lists automatically as the superadmin
+assigns or unassigns it.
+
 Run `supabase/003_admin_delete_summaries.sql` as well to let the superadmin
 delete any member's summary (a **Delete (admin)** button appears on each
 summary on the home page, for the superadmin only).

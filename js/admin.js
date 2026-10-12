@@ -19,18 +19,18 @@ function row(...children) {
   )
 }
 
-function deleteButton(onclick) {
+function deleteButton(onclick, label = 'Remove') {
   return el(
     'button',
     { class: 'btn btn-outline-danger btn-sm flex-shrink-0', type: 'button', onclick },
-    'Remove'
+    label
   )
 }
 
 async function loadBooks() {
   const { data, error } = await db
     .from('books')
-    .select('id, title, author')
+    .select('id, title, author, assignments(id)')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -42,13 +42,23 @@ async function loadBooks() {
     ...data.map((b) => el('option', { value: b.id }, b.author ? `${b.title} — ${b.author}` : b.title))
   )
 
-  if (data.length === 0) {
-    showAlert(booksList, 'No books yet. Add the first one.', 'secondary')
+  // Only books nobody has been assigned yet are listed here; assigned ones
+  // move to the "Assigned books" list below.
+  const unassigned = data.filter((b) => b.assignments.length === 0)
+
+  if (unassigned.length === 0) {
+    showAlert(
+      booksList,
+      data.length === 0
+        ? 'No books yet. Add the first one.'
+        : 'Every book has been assigned.',
+      'secondary'
+    )
     return
   }
 
   booksList.replaceChildren(
-    ...data.map((b) =>
+    ...unassigned.map((b) =>
       row(
         el(
           'div',
@@ -117,8 +127,11 @@ async function loadAssignments() {
         deleteButton(async () => {
           const { error: delError } = await db.from('assignments').delete().eq('id', a.id)
           if (delError) showAlert(message, 'Could not remove that assignment.')
-          else loadAssignments()
-        })
+          else {
+            // The book returns to "Unassigned" if this was its only assignment.
+            await Promise.all([loadAssignments(), loadBooks()])
+          }
+        }, 'Unassign')
       )
     )
   )
@@ -166,7 +179,8 @@ assignForm.addEventListener('submit', async (e) => {
   }
   assignForm.reset()
   message.replaceChildren()
-  loadAssignments()
+  // The book moves from "Unassigned books" to "Assigned books".
+  await Promise.all([loadAssignments(), loadBooks()])
 })
 
 ;(async () => {
