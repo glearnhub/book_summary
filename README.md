@@ -40,6 +40,11 @@ Run `supabase/006_admin_members.sql` to give the superadmin a **Members** table 
 the Admin page (name, email, join date, last sign-in, number of summaries). Emails
 are private; only the superadmin can load that list.
 
+Run `supabase/007_admin_reset_password.sql` to let the superadmin reset a member's
+password from the **Members** table. The site generates a random temporary password
+and shows it once; the member can then change it under **Submit a summary ->
+Change password**.
+
 Run `supabase/003_admin_delete_summaries.sql` as well to let the superadmin
 delete any member's summary (a **Delete (admin)** button appears on each
 summary on the home page, for the superadmin only).

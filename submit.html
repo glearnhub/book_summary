@@ -66,7 +66,37 @@
           <div id="assigned" class="vstack gap-2 mb-4"></div>
 
           <h2 class="h5 mb-3">My summaries</h2>
-          <div id="mine" class="vstack gap-2"></div>
+          <div id="mine" class="vstack gap-2 mb-4"></div>
+
+          <h2 class="h5 mb-3">Change password</h2>
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <div id="password-message" class="mb-3"></div>
+              <form id="password-form" novalidate>
+                <div class="mb-3">
+                  <label for="new-password" class="form-label">New password</label>
+                  <input
+                    id="new-password"
+                    class="form-control"
+                    type="password"
+                    minlength="6"
+                    autocomplete="new-password"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="confirm-password" class="form-label">Confirm new password</label>
+                  <input
+                    id="confirm-password"
+                    class="form-control"
+                    type="password"
+                    minlength="6"
+                    autocomplete="new-password"
+                  />
+                </div>
+                <button class="btn btn-outline-primary" type="submit">Update password</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </main>

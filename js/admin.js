@@ -7,6 +7,85 @@ const memberSelect = document.getElementById('assign-member')
 const booksList = document.getElementById('books')
 const assignmentsList = document.getElementById('assignments')
 
+let currentUserId = null
+
+// 12 characters, no look-alikes (0/O, 1/l/I), from the browser's secure random source.
+function generatePassword(length = 12) {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
+  const bytes = new Uint32Array(length)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (n) => alphabet[n % alphabet.length]).join('')
+}
+
+async function resetPasswordFor(member) {
+  const ok = confirm(
+    `Reset the password for ${member.display_name}?\n\nA new temporary password will be created and they will be signed out.`
+  )
+  if (!ok) return
+
+  const resultBox = document.getElementById('reset-result')
+  const newPassword = generatePassword()
+  const { error } = await db.rpc('admin_reset_password', {
+    target_user: member.member_id,
+    new_password: newPassword,
+  })
+
+  if (error) {
+    showAlert(
+      resultBox,
+      'Could not reset that password. If this is new, run supabase/007_admin_reset_password.sql in the Supabase SQL Editor.',
+      'warning'
+    )
+    return
+  }
+
+  const copyBtn = el(
+    'button',
+    {
+      class: 'btn btn-sm btn-success ms-2',
+      type: 'button',
+      onclick: async () => {
+        try {
+          await navigator.clipboard.writeText(newPassword)
+          copyBtn.textContent = 'Copied'
+        } catch {
+          copyBtn.textContent = 'Copy failed. Select it manually'
+        }
+      },
+    },
+    'Copy'
+  )
+
+  resultBox.replaceChildren(
+    el(
+      'div',
+      { class: 'alert alert-success mb-0' },
+      el('div', { class: 'fw-semibold mb-1' }, `New password for ${member.display_name}`),
+      el(
+        'div',
+        { class: 'd-flex align-items-center flex-wrap gap-1' },
+        el('code', { class: 'fs-5 user-select-all' }, newPassword),
+        copyBtn
+      ),
+      el(
+        'div',
+        { class: 'small mt-2' },
+        'Share it with them privately and ask them to change it under Submit a summary → Change password. ' +
+          'It is shown only once.'
+      ),
+      el(
+        'button',
+        {
+          class: 'btn btn-sm btn-outline-secondary mt-2',
+          type: 'button',
+          onclick: () => resultBox.replaceChildren(),
+        },
+        'Dismiss'
+      )
+    )
+  )
+}
+
 function row(...children) {
   return el(
     'div',
@@ -155,7 +234,7 @@ async function loadMemberTable() {
   const header = el(
     'tr',
     {},
-    ...['Name', 'Email', 'Joined', 'Last sign-in', 'Summaries'].map((h) => el('th', {}, h))
+    ...['Name', 'Email', 'Joined', 'Last sign-in', 'Summaries', ''].map((h) => el('th', {}, h))
   )
 
   const rows = data.map((m) => {
@@ -174,7 +253,22 @@ async function loadMemberTable() {
       emailCell,
       el('td', { class: 'text-nowrap' }, formatDate(m.joined_at)),
       el('td', { class: 'text-nowrap' }, m.last_sign_in_at ? formatDate(m.last_sign_in_at) : 'Never'),
-      el('td', {}, String(m.summaries))
+      el('td', {}, String(m.summaries)),
+      el(
+        'td',
+        { class: 'text-end' },
+        m.member_id === currentUserId
+          ? ''
+          : el(
+              'button',
+              {
+                class: 'btn btn-outline-secondary btn-sm text-nowrap',
+                type: 'button',
+                onclick: () => resetPasswordFor(m),
+              },
+              'Reset password'
+            )
+      )
     )
   })
 
@@ -255,6 +349,7 @@ assignForm.addEventListener('submit', async (e) => {
     return
   }
 
+  currentUserId = session.user.id
   panel.classList.remove('d-none')
   await Promise.all([loadBooks(), loadMembers()])
   loadAssignments()

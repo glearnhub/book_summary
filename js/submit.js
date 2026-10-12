@@ -220,6 +220,31 @@ form.addEventListener('submit', async (e) => {
   loadMine()
 })
 
+document.getElementById('password-form').addEventListener('submit', async (e) => {
+  e.preventDefault()
+  const box = document.getElementById('password-message')
+  const next = document.getElementById('new-password').value
+  const confirmation = document.getElementById('confirm-password').value
+
+  if (next.length < 6) {
+    showAlert(box, 'Your new password must be at least 6 characters.')
+    return
+  }
+  if (next !== confirmation) {
+    showAlert(box, 'The two passwords do not match.')
+    return
+  }
+
+  const { error } = await db.auth.updateUser({ password: next })
+  if (error) {
+    showAlert(box, error.message || 'Could not update your password. Please try again.')
+    return
+  }
+
+  e.target.reset()
+  showAlert(box, 'Password updated.', 'success')
+})
+
 ;(async () => {
   if (!db) {
     await renderNav('submit')
