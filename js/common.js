@@ -28,6 +28,20 @@ function formatDate(iso) {
   })
 }
 
+// Date-only values (YYYY-MM-DD) parsed as local time so they never shift a day.
+function formatDay(day) {
+  return new Date(`${day}T00:00:00`).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+async function fetchRole(userId) {
+  const { data } = await db.from('profiles').select('role').eq('id', userId).maybeSingle()
+  return data?.role || 'member'
+}
+
 function showAlert(container, message, type = 'danger') {
   container.replaceChildren(
     el('div', { class: `alert alert-${type} mb-0`, role: 'alert' }, message)
@@ -47,8 +61,11 @@ function displayNameOf(session) {
 
 async function renderNav(active) {
   const session = await getSession()
+  if (session) session.role = await fetchRole(session.user.id)
+
   const links = [{ href: 'index.html', label: 'Summaries', key: 'home' }]
   if (session) links.push({ href: 'submit.html', label: 'Submit a summary', key: 'submit' })
+  if (session?.role === 'superadmin') links.push({ href: 'admin.html', label: 'Admin', key: 'admin' })
 
   const list = el('ul', { class: 'navbar-nav ms-auto align-items-lg-center gap-lg-2' })
   for (const link of links) {

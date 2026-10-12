@@ -29,7 +29,15 @@
               <form id="summary-form" novalidate>
                 <div class="mb-3">
                   <label for="book-title" class="form-label">Book title</label>
-                  <input id="book-title" class="form-control" type="text" maxlength="200" required />
+                  <input
+                    id="book-title"
+                    class="form-control"
+                    type="text"
+                    maxlength="200"
+                    list="book-options"
+                    required
+                  />
+                  <datalist id="book-options"></datalist>
                 </div>
                 <div class="mb-3">
                   <label for="summary" class="form-label">Your summary</label>
@@ -49,6 +57,9 @@
         </div>
 
         <div class="col-12 col-lg-5">
+          <h2 class="h5 mb-3">My assigned books</h2>
+          <div id="assigned" class="vstack gap-2 mb-4"></div>
+
           <h2 class="h5 mb-3">My summaries</h2>
           <div id="mine" class="vstack gap-2"></div>
         </div>

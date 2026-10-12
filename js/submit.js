@@ -5,8 +5,67 @@ const summaryInput = document.getElementById('summary')
 const count = document.getElementById('count')
 const submitBtn = document.getElementById('submit-btn')
 const mine = document.getElementById('mine')
+const assigned = document.getElementById('assigned')
+const bookOptions = document.getElementById('book-options')
 
 let session = null
+
+async function loadAssigned() {
+  const { data, error } = await db
+    .from('assignments')
+    .select('id, due_date, books(title, author)')
+    .eq('user_id', session.user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    showAlert(assigned, 'Could not load your assigned books.')
+    return
+  }
+  if (data.length === 0) {
+    showAlert(assigned, 'No books have been assigned to you yet.', 'secondary')
+    return
+  }
+
+  assigned.replaceChildren(
+    ...data.map((a) => {
+      const title = a.books?.title || 'Removed book'
+      const sub = [a.books?.author, a.due_date ? `due ${formatDay(a.due_date)}` : null]
+        .filter(Boolean)
+        .join(' · ')
+      return el(
+        'div',
+        { class: 'card' },
+        el(
+          'div',
+          { class: 'card-body d-flex justify-content-between align-items-center gap-3 py-2' },
+          el(
+            'div',
+            { class: 'text-truncate' },
+            el('div', { class: 'fw-semibold text-truncate' }, title),
+            sub ? el('div', { class: 'text-muted small' }, sub) : ''
+          ),
+          el(
+            'button',
+            {
+              class: 'btn btn-outline-primary btn-sm flex-shrink-0',
+              type: 'button',
+              onclick: () => {
+                titleInput.value = title
+                summaryInput.focus()
+              },
+            },
+            'Write summary'
+          )
+        )
+      )
+    })
+  )
+}
+
+async function loadCatalog() {
+  const { data } = await db.from('books').select('title').order('title')
+  bookOptions.replaceChildren(...(data || []).map((b) => el('option', { value: b.title })))
+}
 
 summaryInput.addEventListener('input', () => {
   count.textContent = summaryInput.value.length
@@ -109,4 +168,6 @@ form.addEventListener('submit', async (e) => {
     return
   }
   loadMine()
+  loadAssigned()
+  loadCatalog()
 })()
