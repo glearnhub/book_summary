@@ -137,6 +137,61 @@ async function loadAssignments() {
   )
 }
 
+async function loadMemberTable() {
+  const container = document.getElementById('members')
+  const { data, error } = await db.rpc('admin_list_members')
+
+  if (error) {
+    showAlert(
+      container,
+      'Could not load the member list. If this is new, run supabase/006_admin_members.sql in the Supabase SQL Editor.',
+      'warning'
+    )
+    return
+  }
+
+  document.getElementById('member-count').textContent = data.length
+
+  const header = el(
+    'tr',
+    {},
+    ...['Name', 'Email', 'Joined', 'Last sign-in', 'Summaries'].map((h) => el('th', {}, h))
+  )
+
+  const rows = data.map((m) => {
+    const nameCell = el('td', {}, m.display_name)
+    if (m.role === 'superadmin') {
+      nameCell.append(' ', el('span', { class: 'badge text-bg-primary' }, 'Admin'))
+    }
+    const emailCell = el('td', {}, m.email || '—')
+    if (!m.email_confirmed) {
+      emailCell.append(' ', el('span', { class: 'badge text-bg-warning' }, 'Unconfirmed'))
+    }
+    return el(
+      'tr',
+      {},
+      nameCell,
+      emailCell,
+      el('td', { class: 'text-nowrap' }, formatDate(m.joined_at)),
+      el('td', { class: 'text-nowrap' }, m.last_sign_in_at ? formatDate(m.last_sign_in_at) : 'Never'),
+      el('td', {}, String(m.summaries))
+    )
+  })
+
+  container.replaceChildren(
+    el(
+      'div',
+      { class: 'table-responsive card shadow-sm' },
+      el(
+        'table',
+        { class: 'table table-hover align-middle mb-0' },
+        el('thead', {}, header),
+        el('tbody', {}, ...rows)
+      )
+    )
+  )
+}
+
 bookForm.addEventListener('submit', async (e) => {
   e.preventDefault()
   const title = document.getElementById('book-title').value.trim()
@@ -203,4 +258,5 @@ assignForm.addEventListener('submit', async (e) => {
   panel.classList.remove('d-none')
   await Promise.all([loadBooks(), loadMembers()])
   loadAssignments()
+  loadMemberTable()
 })()

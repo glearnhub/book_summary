@@ -36,6 +36,10 @@ Run `supabase/005_members_see_assignments.sql` so signed-in members can open the
 each). A book moves between the two lists automatically as the superadmin
 assigns or unassigns it.
 
+Run `supabase/006_admin_members.sql` to give the superadmin a **Members** table on
+the Admin page (name, email, join date, last sign-in, number of summaries). Emails
+are private; only the superadmin can load that list.
+
 Run `supabase/003_admin_delete_summaries.sql` as well to let the superadmin
 delete any member's summary (a **Delete (admin)** button appears on each
 summary on the home page, for the superadmin only).
