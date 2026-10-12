@@ -61,3 +61,181 @@ main {
 .nav-pills .nav-link.active {
   background: var(--brand);
 }
+
+/* ---------------------------------------------------------------------------
+   Animations (only applied when the visitor has not asked for reduced motion;
+   js/animations.js adds the .anim class to <html> in that case)
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Circular page loader */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(246, 247, 251, 0.97);
+  opacity: 1;
+  transition: opacity 0.15s ease;
+  /* Failsafe: if the script ever fails, the loader still goes away. */
+  animation: loader-failsafe 0s linear 5s forwards;
+}
+
+.page-loader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+}
+
+.loader-ring {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-ring svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.loader-ring circle {
+  fill: none;
+  stroke-width: 5;
+}
+
+.loader-ring .track {
+  stroke: #dfe2f3;
+}
+
+.loader-ring .progress {
+  stroke: var(--brand);
+  stroke-linecap: round;
+  stroke-dasharray: 213.63;
+  stroke-dashoffset: 213.63;
+}
+
+.page-loader.is-running .progress {
+  animation: ring-fill 0.45s ease-out forwards;
+}
+
+.loader-ring img {
+  position: relative;
+  animation: loader-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes ring-fill {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes loader-pulse {
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes loader-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* Scroll-linked zoom: --p is set from js/animations.js (0 = off screen, 1 = in view) */
+html.anim .reveal {
+  opacity: calc(0.2 + 0.8 * var(--p, 1));
+  transform: scale(calc(0.9 + 0.1 * var(--p, 1)));
+  transition: transform 0.15s ease-out, opacity 0.15s ease-out, box-shadow 0.2s ease,
+    translate 0.2s ease;
+  will-change: transform, opacity;
+}
+
+/* Hover lift (uses `translate`, which does not clash with the zoom transform) */
+html.anim .summary-card:hover,
+html.anim .reveal.card:hover {
+  translate: 0 -3px;
+  box-shadow: 0 0.75rem 1.5rem rgba(33, 37, 80, 0.15) !important;
+}
+
+/* Entrance animations */
+html.anim .site-nav {
+  animation: nav-drop 0.5s ease-out both;
+}
+
+html.anim .hero h1 {
+  animation: fade-up 0.6s ease-out 0.1s both;
+}
+
+html.anim .hero p {
+  animation: fade-up 0.6s ease-out 0.2s both;
+}
+
+html.anim .hero .search-box {
+  animation: fade-up 0.6s ease-out 0.3s both;
+}
+
+html.anim main > h1,
+html.anim main > p {
+  animation: fade-up 0.5s ease-out both;
+}
+
+html.anim .alert {
+  animation: fade-up 0.3s ease-out both;
+}
+
+html.anim .site-footer {
+  animation: fade-up 0.6s ease-out 0.2s both;
+}
+
+@keyframes nav-drop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Buttons and inputs: gentle feedback on hover/press and focus */
+html.anim .btn {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease,
+    color 0.15s ease, border-color 0.15s ease;
+}
+
+html.anim .btn:hover {
+  transform: translateY(-1px);
+}
+
+html.anim .btn:active {
+  transform: scale(0.96);
+}
+
+html.anim .form-control,
+html.anim .form-select {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+html.anim .nav-link {
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
