@@ -79,6 +79,31 @@ function summaryCard(row) {
   return card
 }
 
+let searchFilter = ''
+
+// Characters that are special inside a PostgREST filter value are swapped for "_",
+// which matches any single character, so a search can never break the query.
+function safeTerm(text) {
+  return text.replace(/[\\%*"(),]/g, '_')
+}
+
+// Matches summaries whose book title contains the text, OR that were written by a
+// member whose name contains the text.
+async function buildSearchFilter(term) {
+  const safe = safeTerm(term)
+  const clauses = [`book_title.ilike."*${safe}*"`]
+
+  const { data } = await db
+    .from('profiles')
+    .select('id')
+    .ilike('display_name', `%${safe}%`)
+    .limit(100)
+  const ids = (data || []).map((p) => p.id)
+  if (ids.length > 0) clauses.push(`user_id.in.(${ids.join(',')})`)
+
+  return clauses.join(',')
+}
+
 async function load(reset) {
   if (!db) {
     status.replaceChildren(notConfiguredNotice())
@@ -94,16 +119,19 @@ async function load(reset) {
   const from = page * PAGE_SIZE
   const to = from + PAGE_SIZE - 1
 
+  // Work out which members match the search once per search, not on every "Load more".
+  if (reset) {
+    searchFilter = query ? await buildSearchFilter(query) : ''
+    if (thisRequest !== requestId) return
+  }
+
   let request = db
     .from('summaries')
     .select('id, book_title, summary, created_at, profiles(display_name)')
     .order('created_at', { ascending: false })
     .range(from, to)
 
-  if (query) {
-    const escaped = query.replace(/[\\%_]/g, '\\$&')
-    request = request.ilike('book_title', `%${escaped}%`)
-  }
+  if (searchFilter) request = request.or(searchFilter)
 
   const { data, error } = await request
   if (thisRequest !== requestId) return // a newer search superseded this one
