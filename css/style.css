@@ -1,0 +1,49 @@
+:root {
+  --brand: #3b4cca;
+  --brand-dark: #2a3799;
+  --bg: #f6f7fb;
+}
+
+body {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.site-nav {
+  background: var(--brand-dark);
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+  color: #fff;
+  padding: 3rem 0;
+}
+
+.search-box {
+  max-width: 560px;
+}
+
+.summary-card {
+  border: 0;
+  border-radius: 12px;
+}
+
+.summary-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.btn-primary {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}
+
+.nav-pills .nav-link.active {
+  background: var(--brand);
+}
