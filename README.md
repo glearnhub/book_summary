@@ -53,6 +53,11 @@ Run `supabase/009_reactions.sql` so signed-in members can react to a summary wit
 single tap (like, love, well done, insightful, great read). Tapping again removes
 the reaction.
 
+Run `supabase/010_one_reaction_and_notifications.sql` after 008 and 009. It limits each
+member to one reaction per summary and adds notifications: when someone comments on
+your summary you get a message under **Notifications** (with an unread count in the
+menu). Reactions do not notify.
+
 Run `supabase/003_admin_delete_summaries.sql` as well to let the superadmin
 delete any member's summary (a **Delete (admin)** button appears on each
 summary on the home page, for the superadmin only).

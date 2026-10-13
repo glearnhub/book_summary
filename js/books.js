@@ -32,7 +32,7 @@ function assigneeLine(assignment, myId) {
 async function load(session) {
   const { data, error } = await db
     .from('books')
-    .select('id, title, author, assignments(user_id, due_date, profiles(display_name))')
+    .select('id, title, author, assignments(user_id, due_date, profiles!assignments_user_id_fkey(display_name))')
     .order('title')
 
   if (error) {

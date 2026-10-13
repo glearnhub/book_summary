@@ -64,7 +64,7 @@ function createCommentSection(summaryId, session, isAdmin) {
   async function loadThread() {
     const { data, error } = await db
       .from('comments')
-      .select('id, body, created_at, user_id, profiles(display_name)')
+      .select('id, body, created_at, user_id, profiles!comments_user_id_fkey(display_name)')
       .eq('summary_id', summaryId)
       .order('created_at', { ascending: true })
 

@@ -177,7 +177,7 @@ async function loadMembers() {
 async function loadAssignments() {
   const { data, error } = await db
     .from('assignments')
-    .select('id, due_date, books(title, author), profiles(display_name)')
+    .select('id, due_date, books(title, author), profiles!assignments_user_id_fkey(display_name)')
     .order('created_at', { ascending: false })
 
   if (error) {
