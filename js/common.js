@@ -42,15 +42,6 @@ async function fetchRole(userId) {
   return data?.role || 'member'
 }
 
-// Number of unread notifications; 0 if the notifications table does not exist yet.
-async function fetchUnreadCount() {
-  const { count, error } = await db
-    .from('notifications')
-    .select('id', { count: 'exact', head: true })
-    .is('read_at', null)
-  return error ? 0 : count || 0
-}
-
 function showAlert(container, message, type = 'danger') {
   container.replaceChildren(
     el('div', { class: `alert alert-${type} mb-0`, role: 'alert' }, message)
@@ -70,35 +61,26 @@ function displayNameOf(session) {
 
 async function renderNav(active) {
   const session = await getSession()
-  let unread = 0
-  if (session) {
-    const [role, count] = await Promise.all([fetchRole(session.user.id), fetchUnreadCount()])
-    session.role = role
-    unread = count
-  }
+  if (session) session.role = await fetchRole(session.user.id)
 
   const links = [{ href: 'index.html', label: 'Summaries', key: 'home' }]
   if (session) links.push({ href: 'books.html', label: 'Books', key: 'books' })
   if (session) links.push({ href: 'submit.html', label: 'Submit a summary', key: 'submit' })
-  if (session) {
-    links.push({ href: 'notifications.html', label: 'Notifications', key: 'notifications', badge: unread })
-  }
   if (session?.role === 'superadmin') links.push({ href: 'admin.html', label: 'Admin', key: 'admin' })
 
   const list = el('ul', { class: 'navbar-nav ms-auto align-items-lg-center gap-lg-2' })
   for (const link of links) {
-    const anchor = el(
-      'a',
-      { class: `nav-link${active === link.key ? ' active' : ''}`, href: link.href },
-      link.label
-    )
-    if (link.badge > 0) {
-      anchor.append(
-        ' ',
-        el('span', { class: 'badge rounded-pill text-bg-danger nav-badge' }, String(link.badge))
+    list.append(
+      el(
+        'li',
+        { class: 'nav-item' },
+        el(
+          'a',
+          { class: `nav-link${active === link.key ? ' active' : ''}`, href: link.href },
+          link.label
+        )
       )
-    }
-    list.append(el('li', { class: 'nav-item' }, anchor))
+    )
   }
 
   if (session) {

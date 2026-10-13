@@ -1,0 +1,11 @@
+{
+  "name": "book-circle",
+  "private": true,
+  "description": "Book Circle: weekly book summaries for a reading group. Static site plus one serverless function (api/notify.js) that emails comment notifications.",
+  "dependencies": {
+    "nodemailer": "^10.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

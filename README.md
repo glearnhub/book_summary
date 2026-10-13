@@ -53,10 +53,25 @@ Run `supabase/009_reactions.sql` so signed-in members can react to a summary wit
 single tap (like, love, well done, insightful, great read). Tapping again removes
 the reaction.
 
-Run `supabase/010_one_reaction_and_notifications.sql` after 008 and 009. It limits each
-member to one reaction per summary and adds notifications: when someone comments on
-your summary you get a message under **Notifications** (with an unread count in the
-menu). Reactions do not notify.
+Run `supabase/010_one_reaction.sql` after 009. It limits each member to one reaction
+per summary (tapping another emoji replaces it).
+
+### Email notifications (comments)
+
+When someone comments on a summary, its author gets an email. Reactions never send
+email. This needs three things:
+
+1. Run `supabase/011_email_notifications.sql` in the Supabase SQL Editor, then run the
+   two `insert into private.app_secrets` statements at the bottom of that file with
+   your own values (the site URL ending in `/api/notify`, and a long random secret).
+2. In Vercel -> Project -> Settings -> Environment Variables add:
+   `NOTIFY_SECRET` (the same secret), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
+   `SMTP_PASS`, and optionally `EMAIL_FROM` and `SITE_URL`. Any SMTP mailbox works,
+   for example one created in cPanel on your own domain.
+3. Redeploy so the variables take effect.
+
+The email is sent by `api/notify.js`, which only accepts requests carrying the shared
+secret. Secrets live in Vercel and in a private database table, never in git.
 
 Run `supabase/003_admin_delete_summaries.sql` as well to let the superadmin
 delete any member's summary (a **Delete (admin)** button appears on each
