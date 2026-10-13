@@ -170,7 +170,9 @@ async function load(reset) {
 
   let request = db
     .from('summaries')
-    .select('id, book_title, summary, created_at, profiles(display_name)')
+    // The explicit relationship name matters: comments and reactions also link
+    // summaries to members, so a bare "profiles" would be ambiguous.
+    .select('id, book_title, summary, created_at, profiles!summaries_user_id_fkey(display_name)')
     .order('created_at', { ascending: false })
     .range(from, to)
 
