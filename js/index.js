@@ -227,12 +227,5 @@ loadMore.addEventListener('click', () => {
   const session = await renderNav('home')
   currentSession = session
   isAdmin = session?.role === 'superadmin'
-
-  // Links in notification emails open the home page already searching for that book.
-  const initialQuery = new URLSearchParams(window.location.search).get('q')
-  if (initialQuery) {
-    query = initialQuery.trim().slice(0, 200)
-    searchInput.value = query
-  }
   load(true)
 })()

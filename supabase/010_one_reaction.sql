@@ -1,6 +1,5 @@
 -- Run once in the Supabase SQL Editor, AFTER 009_reactions.sql.
 -- One reaction per member per summary (tapping another emoji replaces it).
--- (Comment notifications are sent by email; see 011_email_notifications.sql.)
 
 -- One reaction per member per summary -------------------------------------
 -- Keep only the newest reaction where a member already picked several.
