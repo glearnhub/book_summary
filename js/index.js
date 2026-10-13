@@ -12,8 +12,30 @@ let requestId = 0
 let isAdmin = false
 let currentSession = null
 
-// summary id -> its comment section, so counts can be filled in after the feed loads
+// summary id -> its comment section / reaction bar, so counts can be filled in
+// after the feed has loaded
 const commentSections = new Map()
+const reactionBars = new Map()
+
+async function loadReactions(rows) {
+  if (!currentSession || rows.length === 0) return
+  const ids = rows.map((r) => r.id)
+  const { data, error } = await db
+    .from('reactions')
+    .select('summary_id, user_id, kind')
+    .in('summary_id', ids)
+  if (error) return // reactions not set up yet: the bars simply stay hidden
+
+  const counts = new Map(ids.map((id) => [id, {}]))
+  const mine = new Map(ids.map((id) => [id, new Set()]))
+  for (const r of data) {
+    const c = counts.get(r.summary_id)
+    if (!c) continue
+    c[r.kind] = (c[r.kind] || 0) + 1
+    if (r.user_id === currentSession.user.id) mine.get(r.summary_id).add(r.kind)
+  }
+  for (const id of ids) reactionBars.get(id)?.setData(counts.get(id), mine.get(id))
+}
 
 async function loadCommentCounts(rows) {
   if (!currentSession || rows.length === 0) return
@@ -67,9 +89,11 @@ function summaryCard(row) {
     card.querySelector('.card-body').append(toggle)
   }
 
+  const reactions = createReactionBar(row.id, currentSession)
+  reactionBars.set(row.id, reactions)
   const thread = createCommentSection(row.id, currentSession, isAdmin)
   commentSections.set(row.id, thread)
-  card.querySelector('.card-body').append(thread.element)
+  card.querySelector('.card-body').append(reactions.element, thread.element)
 
   if (isAdmin) {
     const remove = el(
@@ -164,6 +188,7 @@ async function load(reset) {
   status.replaceChildren()
   for (const row of data) feed.append(summaryCard(row))
   loadCommentCounts(data)
+  loadReactions(data)
 
   if (page === 0 && data.length === 0) {
     const message = query

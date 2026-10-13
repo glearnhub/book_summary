@@ -49,6 +49,10 @@ Run `supabase/008_comments.sql` so signed-in members can comment on each other's
 summaries (a **Comments** button under every summary on the home page). Members can
 delete their own comments, and the superadmin can delete any.
 
+Run `supabase/009_reactions.sql` so signed-in members can react to a summary with a
+single tap (like, love, well done, insightful, great read). Tapping again removes
+the reaction.
+
 Run `supabase/003_admin_delete_summaries.sql` as well to let the superadmin
 delete any member's summary (a **Delete (admin)** button appears on each
 summary on the home page, for the superadmin only).

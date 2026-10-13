@@ -250,3 +250,40 @@ html.anim .nav-link {
   border-left: 3px solid #dfe2f3;
   padding-left: 0.75rem;
 }
+
+/* Reactions under a summary */
+.reaction-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reaction-btn {
+  border: 1px solid #dfe2f3;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.reaction-btn:hover {
+  background: #f1f3ff;
+}
+
+.reaction-btn.active {
+  background: #e8ebff;
+  border-color: var(--brand);
+  font-weight: 600;
+}
+
+.reaction-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+html.anim .reaction-btn:active {
+  transform: scale(0.9);
+}
