@@ -45,6 +45,10 @@ password from the **Members** table. The site generates a random temporary passw
 and shows it once; the member can then change it under **Submit a summary ->
 Change password**.
 
+Run `supabase/008_comments.sql` so signed-in members can comment on each other's
+summaries (a **Comments** button under every summary on the home page). Members can
+delete their own comments, and the superadmin can delete any.
+
 Run `supabase/003_admin_delete_summaries.sql` as well to let the superadmin
 delete any member's summary (a **Delete (admin)** button appears on each
 summary on the home page, for the superadmin only).

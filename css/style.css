@@ -239,3 +239,14 @@ html.anim .form-select {
 html.anim .nav-link {
   transition: color 0.2s ease, opacity 0.2s ease;
 }
+
+/* Comments under a summary */
+.comment-panel {
+  border-top: 1px solid #e3e5ec;
+  padding-top: 1rem;
+}
+
+.comment {
+  border-left: 3px solid #dfe2f3;
+  padding-left: 0.75rem;
+}

@@ -10,6 +10,21 @@ let query = ''
 let page = 0
 let requestId = 0
 let isAdmin = false
+let currentSession = null
+
+// summary id -> its comment section, so counts can be filled in after the feed loads
+const commentSections = new Map()
+
+async function loadCommentCounts(rows) {
+  if (!currentSession || rows.length === 0) return
+  const ids = rows.map((r) => r.id)
+  const { data, error } = await db.from('comments').select('summary_id').in('summary_id', ids)
+  if (error) return // comments not set up yet: buttons simply keep the plain "Comments" label
+
+  const counts = new Map(ids.map((id) => [id, 0]))
+  for (const c of data) counts.set(c.summary_id, (counts.get(c.summary_id) || 0) + 1)
+  for (const [id, n] of counts) commentSections.get(id)?.setCount(n)
+}
 
 function summaryCard(row) {
   const author = row.profiles?.display_name || 'Unknown member'
@@ -51,6 +66,10 @@ function summaryCard(row) {
     )
     card.querySelector('.card-body').append(toggle)
   }
+
+  const thread = createCommentSection(row.id, currentSession, isAdmin)
+  commentSections.set(row.id, thread)
+  card.querySelector('.card-body').append(thread.element)
 
   if (isAdmin) {
     const remove = el(
@@ -144,6 +163,7 @@ async function load(reset) {
 
   status.replaceChildren()
   for (const row of data) feed.append(summaryCard(row))
+  loadCommentCounts(data)
 
   if (page === 0 && data.length === 0) {
     const message = query
@@ -178,6 +198,7 @@ loadMore.addEventListener('click', () => {
 
 ;(async () => {
   const session = await renderNav('home')
+  currentSession = session
   isAdmin = session?.role === 'superadmin'
   load(true)
 })()
