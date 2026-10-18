@@ -43,6 +43,10 @@
                 </div>
                 <div class="mb-3">
                   <label for="summary" class="form-label">Your summary</label>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <button id="bold-btn" class="btn btn-outline-secondary btn-sm fw-bold px-3" type="button" title="Bold (Ctrl+B)" aria-label="Bold">B</button>
+                    <span class="form-text m-0">Select some text, then click <strong>B</strong> to make it bold, for example a title.</span>
+                  </div>
                   <textarea
                     id="summary"
                     class="form-control"
@@ -51,6 +55,10 @@
                     required
                   ></textarea>
                   <div class="form-text text-end"><span id="count">0</span> / 10000</div>
+                  <details class="mt-2" id="preview-box">
+                    <summary class="small text-muted">See how it will look</summary>
+                    <div id="preview" class="summary-text border rounded p-3 mt-2 bg-white"></div>
+                  </details>
                 </div>
                 <button id="submit-btn" class="btn btn-primary" type="submit">Publish summary</button>
                 <button id="cancel-btn" class="btn btn-outline-secondary d-none" type="button">

@@ -51,11 +51,8 @@ async function loadCommentCounts(rows) {
 function summaryCard(row) {
   const author = row.profiles?.display_name || 'Unknown member'
   const isLong = row.summary.length > PREVIEW_CHARS
-  const body = el(
-    'p',
-    { class: 'summary-text mb-0' },
-    isLong ? row.summary.slice(0, PREVIEW_CHARS).trimEnd() + '…' : row.summary
-  )
+  const body = el('p', { class: 'summary-text mb-0' })
+  renderFormatted(body, isLong ? formattedPreview(row.summary, PREVIEW_CHARS) : row.summary)
 
   const card = el(
     'article',
@@ -78,9 +75,7 @@ function summaryCard(row) {
         type: 'button',
         onclick: () => {
           expanded = !expanded
-          body.textContent = expanded
-            ? row.summary
-            : row.summary.slice(0, PREVIEW_CHARS).trimEnd() + '…'
+          renderFormatted(body, expanded ? row.summary : formattedPreview(row.summary, PREVIEW_CHARS))
           toggle.textContent = expanded ? 'Show less' : 'Read more'
         },
       },

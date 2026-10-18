@@ -18,7 +18,7 @@ function enterEditMode(row) {
   editingId = row.id
   titleInput.value = row.book_title
   summaryInput.value = row.summary
-  count.textContent = row.summary.length
+  updatePreview()
   formTitle.textContent = 'Edit your summary'
   submitBtn.textContent = 'Save changes'
   cancelBtn.classList.remove('d-none')
@@ -30,7 +30,7 @@ function enterEditMode(row) {
 function leaveEditMode() {
   editingId = null
   form.reset()
-  count.textContent = '0'
+  updatePreview()
   formTitle.textContent = 'Submit a book summary'
   submitBtn.textContent = 'Publish summary'
   cancelBtn.classList.add('d-none')
@@ -98,9 +98,56 @@ async function loadCatalog() {
   bookOptions.replaceChildren(...(data || []).map((b) => el('option', { value: b.title })))
 }
 
-summaryInput.addEventListener('input', () => {
+const preview = document.getElementById('preview')
+
+function updatePreview() {
   count.textContent = summaryInput.value.length
+  renderFormatted(preview, summaryInput.value || 'Nothing written yet.')
+}
+
+summaryInput.addEventListener('input', updatePreview)
+
+// Bold: wrap the selected text in **...**, or take the markers off if it is already bold.
+function toggleBold() {
+  const text = summaryInput.value
+  let start = summaryInput.selectionStart
+  let end = summaryInput.selectionEnd
+  const before = text.slice(0, start)
+  const selected = text.slice(start, end)
+  const after = text.slice(end)
+
+  let next
+  let caretStart
+  let caretEnd
+  if (selected.startsWith('**') && selected.endsWith('**') && selected.length >= 4) {
+    const inner = selected.slice(2, -2)
+    next = before + inner + after
+    caretStart = start
+    caretEnd = start + inner.length
+  } else if (before.endsWith('**') && after.startsWith('**') && selected) {
+    next = before.slice(0, -2) + selected + after.slice(2)
+    caretStart = start - 2
+    caretEnd = caretStart + selected.length
+  } else {
+    next = before + '**' + selected + '**' + after
+    caretStart = start + 2
+    caretEnd = caretStart + selected.length
+  }
+  if (next.length > summaryInput.maxLength) return
+  summaryInput.value = next
+  summaryInput.focus()
+  summaryInput.setSelectionRange(caretStart, caretEnd)
+  updatePreview()
+}
+
+document.getElementById('bold-btn').addEventListener('click', toggleBold)
+summaryInput.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+    e.preventDefault()
+    toggleBold()
+  }
 })
+updatePreview()
 
 async function loadMine() {
   const { data, error } = await db

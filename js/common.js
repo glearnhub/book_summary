@@ -168,3 +168,25 @@ function notConfiguredNotice() {
     'Open js/config.js and paste your project URL and anon key (see README.md).'
   )
 }
+
+// ---- Bold text in summaries -------------------------------------------------
+// Members mark bold text with **double asterisks** (the B button does it for them).
+// It is drawn with DOM nodes, never innerHTML, so nothing typed can become markup.
+function renderFormatted(node, text) {
+  node.replaceChildren()
+  String(text)
+    .split(/\*\*([\s\S]+?)\*\*/)
+    .forEach((part, i) => {
+      if (!part) return
+      node.append(i % 2 ? el('strong', {}, part) : document.createTextNode(part))
+    })
+}
+
+// First `max` characters, closing a bold section the cut would otherwise leave open.
+function formattedPreview(text, max) {
+  let cut = text.slice(0, max).trimEnd()
+  if ((cut.match(/\*\*/g) || []).length % 2) {
+    cut = cut.endsWith('**') ? cut.slice(0, -2).trimEnd() : cut + '**'
+  }
+  return cut + '…'
+}
